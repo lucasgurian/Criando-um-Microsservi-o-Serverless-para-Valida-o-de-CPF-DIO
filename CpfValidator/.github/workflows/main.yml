@@ -1,0 +1,34 @@
+name: Deploy Python project to Azure Function App
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+    - name: 'Checkout GitHub Action'
+      uses: actions/checkout@v3
+
+    - name: 'Set up Python version'
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
+
+    - name: 'Resolve project dependencies'
+      run: |
+        python -m venv --copies .venv
+        source .venv/bin/activate
+        pip install --upgrade pip
+        pip install -r requirements.txt
+
+    - name: 'Deploy to Azure Functions'
+      uses: Azure/functions-action@v1
+      id: fa
+      with:
+        app-name: 'seu-function-app-name' # Substitua pelo nome do seu Function App
+        package: '.'
+        publish-profile: ${{ secrets.AZURE_FUNCTIONAPP_PUBLISH_PROFILE }}
